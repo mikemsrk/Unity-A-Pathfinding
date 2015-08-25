@@ -6,6 +6,7 @@ public class Grid : MonoBehaviour {
 	public LayerMask unwalkableMask;
 	public Vector2 gridWorldSize;
 	public float nodeRadius;
+	public Transform player;
 	
 	Node[,] grid; // 2D array of nodes
 	
@@ -35,12 +36,23 @@ public class Grid : MonoBehaviour {
 				bool walkable = !(Physics.CheckSphere (worldPoint,nodeRadius,unwalkableMask));
 				// Create the new node at the XY position
 				grid[x,y] = new Node(walkable,worldPoint);
-				
-				
 			}
 		}
+	}
 	
-	
+	// Returns the node from the world position by checking vs. grid
+	public Node NodeFromWorldPoint(Vector3 worldPosition){
+		float percentX = (worldPosition.x + gridWorldSize.x/2) / gridWorldSize.x;
+		float percentY = (worldPosition.z + gridWorldSize.y/2) / gridWorldSize.y;
+		// Clamp it so if worldposition is outside of grid, it won't give you invalid position.
+		percentX = Mathf.Clamp01 (percentX);
+		percentY = Mathf.Clamp01 (percentY);
+		
+		int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
+		int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+		
+		//Return node at this position
+		return grid[x,y];
 	}
 	
 	// Use gizmos to visualize
@@ -48,10 +60,19 @@ public class Grid : MonoBehaviour {
 		Gizmos.DrawWireCube (transform.position,new Vector3(gridWorldSize.x,1,gridWorldSize.y));
 		
 		if(grid != null){
+			Node playerNode = NodeFromWorldPoint(player.position);
+			
 			foreach (Node n in grid){
 				// Vecto3.one = 1,1,1 (xyz)
 				// Subtract .1f from diameter for accuracy.
-				Gizmos.color = (n.walkable) ? Color.white : Color.red; 
+				Gizmos.color = (n.walkable) ? Color.white : Color.red;
+				
+				// Testing purposes, remove later --->
+				if(playerNode == n){
+					Gizmos.color = Color.cyan;
+				}
+				// --/
+				
 				Gizmos.DrawCube (n.worldPosition,Vector3.one * (nodeDiameter-.1f));
 			}
 		}

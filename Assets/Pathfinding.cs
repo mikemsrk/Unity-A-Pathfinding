@@ -95,7 +95,7 @@ public class Pathfinding : MonoBehaviour {
 		int distX = Mathf.Abs (nodeA.gridX - nodeB.gridX);
 		int distY = Mathf.Abs (nodeA.gridY - nodeB.gridY);
 		
-		// Use 14 for diagonal distance of a square = x(length of side) * sqrt(2) * 10
+		// Use 14 for diagonal distance of a square = sqrt(n^2 + n^2) 
 		
 		// [14,10,14]
 		// [10, 0,10]

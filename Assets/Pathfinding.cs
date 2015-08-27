@@ -15,20 +15,29 @@ public class Pathfinding : MonoBehaviour {
 		FindPath (seeker.position,target.position);
 	}
 	
-	
 	void FindPath(Vector3 startPos, Vector3 endPos){
 		Node startNode = grid.NodeFromWorldPoint(startPos);
 		Node targetNode = grid.NodeFromWorldPoint(endPos);
 		
-		// Create Open and Closed set (visited, not visited / can't be visited)
-		// Use hash table
 		// Open set needs to be able to search for lowest f cost = expensive operation
 		List<Node> openSet = new List<Node>();
 		HashSet<Node> closedSet = new HashSet<Node>();
 		// Add start node to Open
 		openSet.Add (startNode);
 
-		// Loop
+		// Main Loop
+		// From starting node --
+		// Search "open" for lowest F cost node
+		// Travel to best node and add it to "closed"
+			// --> If reached end, retrace path and return
+		// Search all neighbors of current node
+			// Calculate g & h costs for each neighbor
+				// g cost might change depending on previously found nodes
+				// If lower g cost is found, replace it for that neighbor
+				// set new h cost as well
+			// Set neighbor's parent to current node = for retracing
+			// Add neighbor to "open" if not already in for next iteration
+			
 		while(openSet.Count > 0){
 			Node currentNode = openSet[0]; 
 			
@@ -44,31 +53,24 @@ public class Pathfinding : MonoBehaviour {
 			// Add current to closed
 			closedSet.Add (currentNode);
 			
-			// Found - Base case
+			// **Found** - Base case
 			if(currentNode == targetNode){
 				RetracePath(startNode,targetNode);
 				return;
 			}
 			
-			// for each neighbor of the current
-			foreach(Node neighbour in grid.GetNeighbours(currentNode)){
-				// if neighbor is unwalkable or closed
-				if(!neighbour.walkable || closedSet.Contains (neighbour)){
-					// skip to next neighbor	
+			foreach(Node neighbor in grid.GetNeighbors(currentNode)){
+				if(!neighbor.walkable || closedSet.Contains (neighbor)){
+					// Don't bother with closed nodes
 					continue;
 				}		
-				int newMovementCostToNeighbour = currentNode.gCost + GetDistance (currentNode,neighbour);
-				// if new path to neighbor is shorter or is not in open
-				if(newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains (neighbour)){
-					// set costs of neighbor
-					neighbour.gCost = newMovementCostToNeighbour;
-					neighbour.hCost = GetDistance (neighbour,targetNode);
-					// set parent of neighbor to current
-					neighbour.parent = currentNode;
-					// if neighbor is not in open
-					if(!openSet.Contains (neighbour)){
-						// add neighbor to open
-						openSet.Add (neighbour);
+				int newMovementCostToNeighbour = currentNode.gCost + GetDistance (currentNode,neighbor);
+				if(newMovementCostToNeighbour < neighbor.gCost || !openSet.Contains (neighbor)){
+					neighbor.gCost = newMovementCostToNeighbour;
+					neighbor.hCost = GetDistance (neighbor,targetNode);
+					neighbor.parent = currentNode;
+					if(!openSet.Contains (neighbor)){
+						openSet.Add (neighbor);
 					}
 				}
 			}
@@ -83,27 +85,25 @@ public class Pathfinding : MonoBehaviour {
 			path.Add (currentNode);
 			currentNode = currentNode.parent;
 		}
-		
 		path.Reverse ();
 		
-		// Visualize path
+		// For visualization
 		grid.path = path;
 	}
 	
 	int GetDistance(Node nodeA, Node nodeB){
-		// 10 for Left,Right,Up,Down
-		// 14 for Diagonal moves
 		int distX = Mathf.Abs (nodeA.gridX - nodeB.gridX);
 		int distY = Mathf.Abs (nodeA.gridY - nodeB.gridY);
+		
+		// Use 14 for diagonal distance of a square = x(length of side) * sqrt(2) * 10
 		
 		// [14,10,14]
 		// [10, 0,10]
 		// [14,10,14]
 		
-		// X is greater than Y
 		if(distX > distY){
 			return 14 * distY + 10 * (distX - distY);
-		}else{ // Y is greater than X
+		}else{ 
 			return 14 * distX + 10 * (distY - distX);
 		}
 	}

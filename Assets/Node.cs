@@ -4,13 +4,12 @@ using System.Collections;
 public class Node {
 
 	public bool walkable;
-	public Vector3 worldPosition;
-	public int gridX; // let it remember its location in grid
+	public Vector3 worldPosition; // location on main scene for visualization and movement
+	public int gridX;
 	public int gridY;
-	
 	public int gCost; // movement cost from starting node
 	public int hCost; // movement cost from ending node
-	public Node parent;
+	public Node parent; // for retracing
 	
 	// Constructor
 	public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY){
@@ -22,7 +21,7 @@ public class Node {
 	
 	public int fCost {
 		get{
-			return gCost + hCost; // never assign F cost, get it by adding
+			return gCost + hCost; // F cost changes depending on traversal
 		}
 	}
 	
